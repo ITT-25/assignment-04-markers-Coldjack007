@@ -3,11 +3,14 @@ import cv2.aruco as aruco
 import numpy as np
 from PIL import Image
 import pyglet
+import math
 
 from pyglet.gl import *
 from pyglet.math import Mat4, Vec3
 
 from AR_model import Model
+
+FREIGHT_DISTANCE = 50
 
 
 INVERSE_MATRIX = np.array([ [ 1.0, 1.0, 1.0, 1.0],
@@ -123,7 +126,36 @@ def animate(dt):
     ## pass a time component for animated/moving 3D objects
     # global time
     # time += dt
+    enton_w = 0
+    enton_h = 0
+    enton_present = False
+    fire_w = 0
+    fire_h = 0
+    fire_present = False
+    freight = False
     for model in models:
+        if model._id == 4 and model._position is not None:
+            enton_w, enton_h = model._position
+            enton_present = True
+        if model._id == 5 and model._position is not None:
+            fire_w, fire_h = model._position
+            fire_present = True
+    if enton_present and fire_present:
+        distance = math.sqrt((fire_w - enton_w)**2 + (fire_h - enton_h)**2)
+        if distance <= FREIGHT_DISTANCE:
+            freight = True
+        else:
+            freight = False
+    for model in models:
+        if model._id == 4:
+            if freight:
+                model._rot_x += 20
+                model._rot_y += 20
+                model._rot_z += 20
+            else:
+                model._rot_x = 0
+                model._rot_y = 0
+                model._rot_z = 0
         model.animate()    
 
 
@@ -140,7 +172,8 @@ if __name__ == "__main__":
     glEnable(GL_CULL_FACE)
 
     models = []
-    models.append(Model(path="enton.obj", id=6, win_w=WINDOW_WIDTH, win_h=WINDOW_HEIGHT, rot_x=270, rot_y=90, rot_z=270, scaling_factor=0.2))
+    models.append(Model(path="./ar_game_3d/enton.obj", id=4, win_w=WINDOW_WIDTH, win_h=WINDOW_HEIGHT, rot_x=270, rot_y=90, rot_z=270, scaling_factor=0.2))
+    models.append(Model(path="./ar_game_3d/fireball.obj", id=5, win_w=WINDOW_WIDTH, win_h=WINDOW_HEIGHT, rot_x=270, rot_y=90, rot_z=270, scaling_factor=2))
 
     # Set the application wide view matrix (camera):
     window.view = Mat4.look_at(position=Vec3(0, 0, WINDOW_Z), target=Vec3(0, 0, 0), up=Vec3(0, 1, 0))
