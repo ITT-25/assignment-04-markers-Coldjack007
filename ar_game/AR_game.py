@@ -237,15 +237,16 @@ def on_draw():
     if game_over == False:
         ret, frame = cap.read()
         frame = catch_arucos(frame)
-        capture_finger(frame)
-        if game_active:
-            progress_game()
-            compute_input()
-        img = cv2glet(frame, 'BGR')
-        img.blit(0, 0, 0)
-        batch.draw()
-        finger_circle = pyglet.shapes.Circle(finger_position[0], WINDOW_HEIGHT - finger_position[1], 10, color=(0, 255, 0))
-        finger_circle.draw()
+        if frame is not None:
+            capture_finger(frame)
+            if game_active:
+                progress_game()
+                compute_input()
+            img = cv2glet(frame, 'BGR')
+            img.blit(0, 0, 0)
+            batch.draw()
+            finger_circle = pyglet.shapes.Circle(finger_position[0], WINDOW_HEIGHT - finger_position[1], 10, color=(0, 255, 0))
+            finger_circle.draw()
     else:
         ending_message.draw()
 
